@@ -1,6 +1,9 @@
 package com.flossware.multitimer.service;
 
+import com.flossware.multitimer.model.TimerModel;
+
 import javax.sound.sampled.*;
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.URL;
 
@@ -21,7 +24,6 @@ public class SoundService {
             URL resource = getClass().getResource("/alarm.wav");
             if (resource == null) {
                 // Fallback to system beep if no sound file is found
-                Toolkit.getDefaultToolkit().beep();
                 return;
             }
             AudioInputStream inputStream = AudioSystem.getAudioInputStream(resource);
@@ -30,7 +32,6 @@ public class SoundService {
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             // In case of error, fall back to system beep
             e.printStackTrace();
-            Toolkit.getDefaultToolkit().beep();
         }
     }
 
@@ -40,6 +41,7 @@ public class SoundService {
      */
     public void playAlarm() {
         if (alarmClip == null) {
+            Toolkit.getDefaultToolkit().beep();
             return;
         }
         if (alarmClip.isRunning()) {
@@ -47,6 +49,13 @@ public class SoundService {
         }
         alarmClip.setFramePosition(0);
         alarmClip.start();
+    }
+
+    /**
+     * Overloaded method to play alarm for a specific timer.
+     */
+    public void playAlarm(TimerModel timer) {
+        playAlarm();
     }
 
     /**
@@ -81,7 +90,7 @@ public class SoundService {
             alarmClip.stop();
         }
         if (alarmClip != null) {
-            alarmClip.dispose();
+            alarmClip.close();
         }
     }
 }

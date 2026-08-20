@@ -1,12 +1,11 @@
 package com.flossware.multitimer.ui;
 
 import com.flossware.multitimer.model.TimerModel;
-import com.flossware.multitimer.util.TimeFormatter;
-import com.formdev.flatlaf.FlatLaf;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -15,7 +14,7 @@ public class NotesDialog extends JDialog implements PropertyChangeListener {
     private final TimerModel timer;
 
     public NotesDialog(TimerModel timer) {
-        super(new Frame(), "Notes Editor", true);
+        super((Frame) null, "Notes Editor", true);
         this.timer = timer;
         setLayout(new BorderLayout(10, 10));
         setSize(400, 300);
@@ -25,9 +24,24 @@ public class NotesDialog extends JDialog implements PropertyChangeListener {
         notesArea = new JTextArea();
         notesArea.setText(timer.getNotes());
         notesArea.setFont(new Font("Arial", Font.PLAIN, 14));
-        notesArea.getDocument().addPropertyChangeListener(e -> {
-            if ("contents".equals(e.getPropertyName())) {
+        notesArea.getDocument().addDocumentListener(new DocumentListener() {
+            private void updateNotes() {
                 timer.setNotes(notesArea.getText());
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateNotes();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateNotes();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateNotes();
             }
         });
 
@@ -56,4 +70,3 @@ public class NotesDialog extends JDialog implements PropertyChangeListener {
         }
     }
 }
-

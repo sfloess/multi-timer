@@ -46,16 +46,14 @@ public class TimerListPanel extends JPanel {
         TimerPanel p = new TimerPanel(model);
         setupPanelSelection(p);
         
-        // Remove the vertical glue if present at the end
+        // Remove vertical glue if present at the end
         int count = containerPanel.getComponentCount();
         if (count > 0 && containerPanel.getComponent(count - 1) instanceof Box.Filler) {
             containerPanel.remove(count - 1);
         }
 
-        if (containerPanel.getComponentCount() > 0) {
-            containerPanel.add(Box.createVerticalStrut(10));
-        }
         containerPanel.add(p);
+        containerPanel.add(Box.createVerticalStrut(10));
         containerPanel.add(Box.createVerticalGlue());
 
         containerPanel.revalidate();
@@ -67,15 +65,11 @@ public class TimerListPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (selectedTimerPanel != null) {
-                    selectedTimerPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+                    selectedTimerPanel.setBackground(new Color(0x1E293B));
                 }
                 selectedTimerPanel = panel;
-                selectedTimerPanel.setBorder(BorderFactory.createLineBorder(new Color(0x38BDF8), 2));
+                selectedTimerPanel.setBackground(new Color(0x334155));
             }
         });
-    }
-
-    public TimerPanel getSelectedTimerPanel() {
-        return selectedTimerPanel;
     }
 }

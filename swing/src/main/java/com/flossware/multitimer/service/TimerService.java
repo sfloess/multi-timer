@@ -1,10 +1,8 @@
 package com.flossware.multitimer.service;
 
-import com.flossware.multitimer.model.AppState;
+import com.flossware.multitimer.AppState;
 import com.flossware.multitimer.model.TimerModel;
-import com.flossware.multitimer.service.SoundService;
 
-import javax.swing.SwingUtilities;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

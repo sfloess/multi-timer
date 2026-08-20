@@ -36,7 +36,7 @@ public class TimerModel {
         this.pcs = new PropertyChangeSupport(this);
     }
 
-    private PropertyChangeSupport getPcs() {
+    public PropertyChangeSupport getPcs() {
         if (pcs == null) {
             pcs = new PropertyChangeSupport(this);
         }

@@ -10,7 +10,7 @@ public class TimePickerDialog extends JDialog {
     private boolean confirmed = false;
 
     public TimePickerDialog(Component parent, long initialSeconds) {
-        super(parent, "Set Timer Duration", true);
+        super(parent instanceof Frame ? (Frame) parent : (Frame) SwingUtilities.getWindowAncestor(parent), "Set Timer Duration", true);
         
         long h = initialSeconds / 3600;
         long m = (initialSeconds % 3600) / 60;
@@ -52,13 +52,25 @@ public class TimePickerDialog extends JDialog {
         setResizable(false);
     }
 
+    public static long showDialog(Component parent, long initialSeconds) {
+        TimePickerDialog dialog = new TimePickerDialog(parent, initialSeconds);
+        dialog.setVisible(true);
+        if (dialog.isConfirmed()) {
+            return dialog.getTotalSeconds();
+        }
+        return initialSeconds;
+    }
+
     private JPanel createTimeField(String labelText, JSpinner spinner) {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         
         JLabel label = new JLabel(labelText);
-        spinner.setColumns(4);
+        JComponent editor = spinner.getEditor();
+        if (editor instanceof JSpinner.DefaultEditor) {
+            ((JSpinner.DefaultEditor) editor).getTextField().setColumns(4);
+        }
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -79,14 +91,5 @@ public class TimePickerDialog extends JDialog {
         return ((Number) hourSpinner.getValue()).longValue() * 3600 +
                ((Number) minSpinner.getValue()).longValue() * 60 +
                ((Number) secSpinner.getValue()).longValue();
-    }
-
-    public static long showDialog(Component parent, long initialSeconds) {
-        TimePickerDialog dialog = new TimePickerDialog(parent, initialSeconds);
-        dialog.setVisible(true);
-        if (dialog.isConfirmed()) {
-            return dialog.getTotalSeconds();
-        }
-        return initialSeconds;
     }
 }
