@@ -9,6 +9,7 @@ import {
   AppState,
   AppStateStatus,
   StatusBar,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
@@ -17,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { TimerProvider, useTimerContext } from './src/context/TimerContext';
 import { Toolbar } from './src/components/Toolbar';
 import { TimerPane } from './src/components/TimerPane';
+import { CalendarView } from './src/components/CalendarView';
 
 // Configure notification behavior for when the app is in the foreground
 Notifications.setNotificationHandler({
@@ -33,6 +35,7 @@ function MainAppContent() {
   const { state } = useTimerContext();
   const { width } = useWindowDimensions();
   const [, setAppState] = useState<AppStateStatus>(AppState.currentState);
+  const [activeTab, setActiveTab] = useState<'timers' | 'calendar'>('timers');
 
   // Sync state on foregrounding to instantly recalculate backgrounded countdowns
   useEffect(() => {
@@ -81,46 +84,88 @@ function MainAppContent() {
     <View style={styles.appContainer}>
       <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
 
-      {/* Global Action Toolbar */}
-      <Toolbar />
+      {/* Main Content Area */}
+      <View style={styles.contentContainer}>
+        {activeTab === 'timers' ? (
+          <>
+            {/* Global Action Toolbar */}
+            <Toolbar />
 
-      {state.timers.length === 0 ? (
-        /* Empty State Screen */
-        <View style={styles.emptyContainer}>
-          <View style={styles.emptyIconCircle}>
-            <Ionicons name="hourglass-outline" size={48} color="#94A3B8" />
-          </View>
-          <Text style={styles.emptyTitle}>No Active Timers</Text>
-          <Text style={styles.emptySubtitle}>
-            Tap "Add Timer" above to spin up a new high-precision countdown tracker.
-          </Text>
-        </View>
-      ) : (
-        /* Responsive Scrollable Grid */
-        <ScrollView
-          style={styles.scrollArea}
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingHorizontal: padding, paddingTop: padding, paddingBottom: padding + 40 },
-          ]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={[styles.gridContainer, { gap }]}>
-            {state.timers.map((timer) => (
-              <View
-                key={timer.id}
-                style={[
-                  styles.gridItem,
-                  { width: Platform.OS === 'web' ? (itemWidth as any) : itemWidth },
-                ]}
-              >
-                <TimerPane timer={timer} />
+            {state.timers.length === 0 ? (
+              /* Empty State Screen */
+              <View style={styles.emptyContainer}>
+                <View style={styles.emptyIconCircle}>
+                  <Ionicons name="hourglass-outline" size={48} color="#94A3B8" />
+                </View>
+                <Text style={styles.emptyTitle}>No Active Timers</Text>
+                <Text style={styles.emptySubtitle}>
+                  Tap "Add Timer" above to spin up a new high-precision countdown tracker.
+                </Text>
               </View>
-            ))}
-          </View>
-        </ScrollView>
-      )}
+            ) : (
+              /* Responsive Scrollable Grid */
+              <ScrollView
+                style={styles.scrollArea}
+                contentContainerStyle={[
+                  styles.scrollContent,
+                  { paddingHorizontal: padding, paddingTop: padding, paddingBottom: padding + 40 },
+                ]}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+              >
+                <View style={[styles.gridContainer, { gap }]}>
+                  {state.timers.map((timer) => (
+                    <View
+                      key={timer.id}
+                      style={[
+                        styles.gridItem,
+                        { width: Platform.OS === 'web' ? (itemWidth as any) : itemWidth },
+                      ]}
+                    >
+                      <TimerPane timer={timer} />
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            )}
+          </>
+        ) : (
+          <CalendarView />
+        )}
+      </View>
+
+      {/* Custom Bottom Tab Navigation */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={styles.tabItem}
+          onPress={() => setActiveTab('timers')}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="timer-outline"
+            size={24}
+            color={activeTab === 'timers' ? '#3B82F6' : '#64748B'}
+          />
+          <Text style={[styles.tabLabel, { color: activeTab === 'timers' ? '#3B82F6' : '#64748B' }]}>
+            Timers
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tabItem}
+          onPress={() => setActiveTab('calendar')}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="calendar-outline"
+            size={24}
+            color={activeTab === 'calendar' ? '#3B82F6' : '#64748B'}
+          />
+          <Text style={[styles.tabLabel, { color: activeTab === 'calendar' ? '#3B82F6' : '#64748B' }]}>
+            Calendar
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -145,6 +190,9 @@ const styles = StyleSheet.create({
   appContainer: {
     flex: 1,
     backgroundColor: '#F8FAFC',
+  },
+  contentContainer: {
+    flex: 1,
   },
   scrollArea: {
     flex: 1,
@@ -193,5 +241,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     maxWidth: 340,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    height: 64,
+    backgroundColor: '#0F172A',
+    borderTopWidth: 1,
+    borderTopColor: '#1E293B',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+  },
+  tabLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
   },
 });

@@ -10,4 +10,6 @@ export interface TimerInstance {
   isSelected: boolean;
   targetTime: number | null;
   notificationId: string | null;
+  scheduledFor?: string | null; // ISO string representing scheduled date & time
+  completedAt?: string | null;  // ISO string representing completion timestamp
 }

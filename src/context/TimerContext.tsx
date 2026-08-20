@@ -10,6 +10,20 @@ interface TimerState {
 
 type TimerAction =
   | { type: 'ADD_TIMER' }
+  | {
+      type: 'ADD_SCHEDULED_TIMER';
+      timer: Omit<
+        TimerInstance,
+        'id' | 'remainingTime' | 'status' | 'isSelected' | 'targetTime' | 'notificationId' | 'completedAt'
+      >;
+    }
+  | {
+      type: 'SCHEDULE_NEW_TIMER';
+      name: string;
+      duration: number;
+      notes: string;
+      scheduledFor: string;
+    }
   | { type: 'DELETE_TIMERS' }
   | { type: 'TOGGLE_SELECT_TIMER'; id: string }
   | { type: 'UPDATE_TIMER_NAME'; id: string; name: string }
@@ -22,6 +36,7 @@ type TimerAction =
       targetTime?: number | null;
       notificationId?: string | null;
       remainingTime?: number;
+      completedAt?: string | null;
     }
   | { type: 'MOVE_TIMER'; direction: 'UP' | 'DOWN'; id: string }
   | { type: 'SET_TIMERS'; timers: TimerInstance[] }
@@ -40,6 +55,8 @@ const initialTimers: TimerInstance[] = [
     isSelected: false,
     targetTime: null,
     notificationId: null,
+    scheduledFor: null,
+    completedAt: null,
   },
   {
     id: '2',
@@ -51,6 +68,8 @@ const initialTimers: TimerInstance[] = [
     isSelected: false,
     targetTime: null,
     notificationId: null,
+    scheduledFor: null,
+    completedAt: null,
   },
 ];
 
@@ -67,13 +86,51 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         isSelected: false,
         targetTime: null,
         notificationId: null,
+        scheduledFor: null,
+        completedAt: null,
       };
       return { ...state, timers: [newTimer, ...state.timers] };
     }
+
+    case 'ADD_SCHEDULED_TIMER': {
+      const newTimer: TimerInstance = {
+        id: Date.now().toString(),
+        name: action.timer.name,
+        initialDuration: action.timer.initialDuration,
+        remainingTime: action.timer.initialDuration,
+        status: 'IDLE',
+        notes: action.timer.notes || '',
+        isSelected: false,
+        targetTime: null,
+        notificationId: null,
+        scheduledFor: action.timer.scheduledFor || null,
+        completedAt: null,
+      };
+      return { ...state, timers: [newTimer, ...state.timers] };
+    }
+
+    case 'SCHEDULE_NEW_TIMER': {
+      const newTimer: TimerInstance = {
+        id: Date.now().toString(),
+        name: action.name,
+        initialDuration: action.duration,
+        remainingTime: action.duration,
+        status: 'IDLE',
+        notes: action.notes,
+        isSelected: false,
+        targetTime: null,
+        notificationId: null,
+        scheduledFor: action.scheduledFor,
+        completedAt: null,
+      };
+      return { ...state, timers: [newTimer, ...state.timers] };
+    }
+
     case 'DELETE_TIMERS': {
       const remaining = state.timers.filter((t) => !t.isSelected);
       return { ...state, timers: remaining };
     }
+
     case 'TOGGLE_SELECT_TIMER': {
       return {
         ...state,
@@ -82,6 +139,7 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         ),
       };
     }
+
     case 'UPDATE_TIMER_NAME': {
       return {
         ...state,
@@ -90,6 +148,7 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         ),
       };
     }
+
     case 'UPDATE_TIMER_DURATION': {
       return {
         ...state,
@@ -105,6 +164,7 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         ),
       };
     }
+
     case 'UPDATE_TIMER_NOTES': {
       return {
         ...state,
@@ -113,11 +173,21 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         ),
       };
     }
+
     case 'UPDATE_TIMER_STATUS': {
       return {
         ...state,
         timers: state.timers.map((t) => {
           if (t.id === action.id) {
+            const isCompleted = action.status === 'COMPLETED';
+            const completedAt = isCompleted
+              ? action.completedAt !== undefined
+                ? action.completedAt
+                : new Date().toISOString()
+              : action.status === 'IDLE' || action.status === 'RUNNING'
+                ? null
+                : t.completedAt;
+
             return {
               ...t,
               status: action.status,
@@ -133,19 +203,20 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
                 action.remainingTime !== undefined
                   ? action.remainingTime
                   : t.remainingTime,
+              completedAt,
             };
           }
           return t;
         }),
       };
     }
+
     case 'MOVE_TIMER': {
       const index = state.timers.findIndex((t) => t.id === action.id);
       if (index === -1) return state;
 
       const newTimers = [...state.timers];
-      const targetIndex =
-        action.direction === 'UP' ? index - 1 : index + 1;
+      const targetIndex = action.direction === 'UP' ? index - 1 : index + 1;
 
       if (targetIndex < 0 || targetIndex >= newTimers.length) return state;
 
@@ -155,10 +226,13 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
 
       return { ...state, timers: newTimers };
     }
+
     case 'SET_TIMERS':
       return { ...state, timers: action.timers };
+
     case 'CLEAR_ALL':
       return { ...state, timers: [] };
+
     default:
       return state;
   }
@@ -176,6 +250,7 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [state, dispatch] = useReducer(timerReducer, { timers: initialTimers });
 
+  // Load persisted timers on mount
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((data) => {
       if (data) {
@@ -191,6 +266,7 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, []);
 
+  // Persist timers whenever they change
   useEffect(() => {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state.timers)).catch((e) =>
       console.error('Failed to save timers to storage', e)
