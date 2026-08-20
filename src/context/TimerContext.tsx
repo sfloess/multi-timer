@@ -73,6 +73,7 @@ const initialTimers: TimerInstance[] = [
     notificationId: null,
     scheduledFor: null,
     completedAt: null,
+    position: 0,
   },
   {
     id: '2',
@@ -86,6 +87,7 @@ const initialTimers: TimerInstance[] = [
     notificationId: null,
     scheduledFor: null,
     completedAt: null,
+    position: 1,
   },
 ];
 
@@ -107,8 +109,10 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         notificationId: null,
         scheduledFor: null,
         completedAt: null,
+        position: 0,
       };
-      return { ...state, timers: [newTimer, ...state.timers] };
+      const updatedTimers = [newTimer, ...state.timers].map((t, i) => ({ ...t, position: i }));
+      return { ...state, timers: updatedTimers };
     }
 
     case 'ADD_SCHEDULED_TIMER': {
@@ -124,6 +128,7 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         notificationId: null,
         scheduledFor: action.timer.scheduledFor || null,
         completedAt: null,
+        position: 0,
       };
       return { ...state, timers: [newTimer, ...state.timers] };
     }
@@ -141,6 +146,7 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         notificationId: null,
         scheduledFor: action.scheduledFor,
         completedAt: null,
+        position: 0,
       };
       return { ...state, timers: [newTimer, ...state.timers] };
     }
@@ -240,7 +246,11 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
       newTimers[index] = newTimers[targetIndex];
       newTimers[targetIndex] = tmp;
 
-      return { ...state, timers: newTimers };
+      // reindex all timers with their array index as position using map((t, i) => ({...t, position: i}))
+      return {
+        ...state,
+        timers: newTimers.map((t, i) => ({ ...t, position: i }))
+      };
     }
 
     case 'SET_TIMERS':

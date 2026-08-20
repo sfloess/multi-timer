@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "multi-timer-dev",
-    "slug": "multi-timer-dev",
+    "name": "Multi Timer",
+    "slug": "multi-timer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

@@ -60,6 +60,10 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
       );`,
       `CREATE INDEX IF NOT EXISTS idx_notes_updated ON notes(updatedAt);`
     ],
+    3: [
+      `ALTER TABLE timers ADD COLUMN position INTEGER NOT NULL DEFAULT 0;`,
+      `CREATE INDEX IF NOT EXISTS idx_timers_position ON timers(position);`
+    ],
   };
 
   const targetVersion = Object.keys(migrations).length;

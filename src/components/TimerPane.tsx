@@ -76,16 +76,32 @@ export const TimerPane: React.FC<TimerPaneProps> = ({ timer }) => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       try {
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (ctx.state === 'suspended') {
+          await ctx.resume();
+        }
         const osc = ctx.createOscillator();
         osc.frequency.value = 880;
         osc.connect(ctx.destination);
         osc.start();
-        setTimeout(() => osc.stop(), 300);
+        setTimeout(async () => {
+          osc.stop();
+          if (ctx.state !== 'closed') {
+            await ctx.close();
+          }
+        }, 300);
       } catch {}
     }
   };
 
   const handleComplete = async () => {
+    if (timer.notificationId && Platform.OS !== 'web') {
+      try {
+        await Notifications.cancelScheduledNotificationAsync(timer.notificationId);
+      } catch (e) {
+        console.log('Failed to cancel notification:', e);
+      }
+    }
+
     if (timerRef.current) clearInterval(timerRef.current);
 
     dispatch({

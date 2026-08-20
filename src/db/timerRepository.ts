@@ -20,6 +20,7 @@ function mapRowToInstance(row: TimerRow): TimerInstance {
     notificationId:   row.notificationId,
     scheduledFor:     row.scheduledFor,
     completedAt:      row.completedAt,
+    position:         row.position,
     createdAt:        row.createdAt,
     updatedAt:        row.updatedAt,
   };
@@ -43,6 +44,7 @@ function timerToRow(timer: TimerInstance, fallbackTimestamp: string): TimerRow {
     notificationId:   timer.notificationId ?? null,
     scheduledFor:     timer.scheduledFor ?? null,
     completedAt:      timer.completedAt ?? null,
+    position:         timer.position ?? 0,
     createdAt:        timer.createdAt ?? now,
     updatedAt:        timer.updatedAt ?? now,
   };
@@ -62,7 +64,7 @@ function nowIso(): string {
 export async function getAllTimers(): Promise<TimerInstance[]> {
   const db = await getDatabase();
   const rows = await db.getAllAsync<TimerRow>(
-    'SELECT * FROM timers ORDER BY createdAt DESC;'
+    'SELECT * FROM timers ORDER BY position ASC, createdAt DESC;'
   );
   return rows.map(mapRowToInstance);
 }
@@ -89,8 +91,8 @@ export async function insertTimer(timer: TimerInstance): Promise<void> {
       `INSERT INTO timers (
         id, name, initialDuration, remainingTime, status, notes,
         isSelected, targetTime, notificationId, scheduledFor,
-        completedAt, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        completedAt, position, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         timer.id,
         timer.name,
@@ -103,6 +105,7 @@ export async function insertTimer(timer: TimerInstance): Promise<void> {
         timer.notificationId,
         timer.scheduledFor ?? null,
         timer.completedAt ?? null,
+        timer.position ?? 0,
         timer.createdAt ?? nowIso(),
         timer.updatedAt ?? nowIso(),
       ]
@@ -132,6 +135,7 @@ export async function updateTimer(timer: TimerInstance): Promise<void> {
         notificationId = ?,
         scheduledFor = ?,
         completedAt = ?,
+        position = ?,
         updatedAt = ?
       WHERE id = ?;`,
       [
@@ -145,6 +149,7 @@ export async function updateTimer(timer: TimerInstance): Promise<void> {
         timer.notificationId,
         timer.scheduledFor ?? null,
         timer.completedAt ?? null,
+        timer.position ?? 0,
         now,
         timer.id,
       ]
@@ -168,8 +173,8 @@ export async function saveTimer(timer: TimerInstance): Promise<void> {
       `INSERT INTO timers (
         id, name, initialDuration, remainingTime, status, notes,
         isSelected, targetTime, notificationId, scheduledFor,
-        completedAt, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        completedAt, position, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         name = excluded.name,
         initialDuration = excluded.initialDuration,
@@ -181,6 +186,7 @@ export async function saveTimer(timer: TimerInstance): Promise<void> {
         notificationId = excluded.notificationId,
         scheduledFor = excluded.scheduledFor,
         completedAt = excluded.completedAt,
+        position = excluded.position,
         updatedAt = excluded.updatedAt;`,
       [
         timer.id,
@@ -194,6 +200,7 @@ export async function saveTimer(timer: TimerInstance): Promise<void> {
         timer.notificationId,
         timer.scheduledFor ?? null,
         timer.completedAt ?? null,
+        timer.position ?? 0,
         timer.createdAt ?? now,
         timer.updatedAt ?? now,
       ]

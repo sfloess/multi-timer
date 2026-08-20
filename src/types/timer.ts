@@ -14,6 +14,7 @@ export interface TimerInstance {
   completedAt: string | null;    // ISO string when completed
   createdAt?: string;
   updatedAt?: string;
+  position?: number; // optional, for display order, 0-based
 }
 
 export interface TimerRow {
@@ -30,4 +31,5 @@ export interface TimerRow {
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  position: number; // required
 }

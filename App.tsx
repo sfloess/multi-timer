@@ -67,6 +67,17 @@ function MainAppContent() {
     requestPermissions();
   }, []);
 
+  // Set up notification response listener
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      // Logic for handling user interaction with notifications can be added here
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   // Responsive grid configuration based on screen width
   const getGridConfig = () => {
     if (width > 1024) {
