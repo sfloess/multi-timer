@@ -95,10 +95,10 @@ jobs:
           --hidden-import multi_timer.config \
           --hidden-import multi_timer.database \
           --hidden-import multi_timer.settings_dialog \
-          multi_timer/main.py 2>/dev/null || \
+          multi_timer/__main__.py 2>/dev/null || \
         pyinstaller --onefile --name multi-timer \
           --collect-all multi_timer \
-          multi_timer/main.py
+          multi_timer/__main__.py
 
     - name: Upload curses artifact
       uses: actions/upload-artifact@v4
@@ -145,17 +145,6 @@ jobs:
       with:
         xcode-version: '15.2'
 
-    - name: Install Apple Distribution Certificate
-      uses: apple-actions/import-codesign-certs@v3
-      with:
-        p12-file-base64: ${{ secrets.APPLE_P12_BASE64 }}
-        p12-password: ${{ secrets.APPLE_P12_PASSWORD }}
-
-    - name: Install Provisioning Profile
-      uses: apple-actions/install-provisioning-profile@v1
-      with:
-        provisioning-profile-base64: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
-
     - name: Build iOS app
       run: |
         cd swiftui
@@ -164,7 +153,9 @@ jobs:
           -configuration Release \
           -archivePath build/MultiTimer.xcarchive \
           -sdk iphoneos \
-          -allowProvisioningUpdates || true
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO || true
 
     - name: Create export options
       run: |
@@ -175,7 +166,7 @@ jobs:
         <plist version="1.0">
         <dict>
           <key>method</key>
-          <string>app-store-connect</string>
+          <string>development</string>
           <key>compileBitcode</key>
           <false/>
         </dict>

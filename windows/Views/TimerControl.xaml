@@ -9,7 +9,6 @@
              Background="{DynamicResource CardBackgroundBrush}"
              BorderBrush="{DynamicResource BorderBrush}"
              BorderThickness="1"
-             CornerRadius="8"
              Margin="0,0,0,10">
     
     <UserControl.Resources>

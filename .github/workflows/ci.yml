@@ -121,10 +121,10 @@ jobs:
           --hidden-import multi_timer.config \
           --hidden-import multi_timer.database \
           --hidden-import multi_timer.settings_dialog \
-          multi_timer/main.py 2>/dev/null || \
+          multi_timer/__main__.py 2>/dev/null || \
         pyinstaller --onefile --name multi-timer \
           --collect-all multi_timer \
-          multi_timer/main.py
+          multi_timer/__main__.py
 
     - name: Verify binary exists and is executable
       working-directory: curses
