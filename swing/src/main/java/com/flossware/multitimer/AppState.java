@@ -25,4 +25,13 @@ public class AppState {
     public void addTimer(TimerModel timer) {
         this.timers.add(timer);
     }
+
+    public void removeTimer(TimerModel timer) {
+        this.timers.remove(timer);
+    }
+
+    public void clearTimers() {
+        this.timers.clear();
+    }
 }
+
