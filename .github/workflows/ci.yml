@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-swing:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build Swing JAR
+      run: mvn -B clean package -DskipTests
+      working-directory: swing
+
+    - name: Verify JAR exists
+      run: ls -la swing/target/multi-timer.jar
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Add NuGet packages
+      working-directory: windows
+      run: |
+        dotnet add package Microsoft.Data.Sqlite --version 8.0.1
+        dotnet add package Npgsql --version 8.0.1
+
+    - name: Publish Windows app (matches release packaging)
+      working-directory: windows
+      run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+
+    - name: Verify EXE exists
+      working-directory: windows
+      run: |
+        if (Test-Path "publish/MultiTimer.exe") {
+          Write-Host "MultiTimer.exe found"
+          Get-Item publish/MultiTimer.exe | Select-Object Name, Length
+        } else {
+          Write-Error "MultiTimer.exe not found in publish output"
+          exit 1
+        }
+
+  check-curses:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Verify curses package structure
+      working-directory: curses
+      run: |
+        pip install -e .
+        python -c "import multi_timer; print('import OK')"
+
+    - name: Install PyInstaller
+      run: pip install pyinstaller
+
+    - name: Build standalone binary (matches release packaging)
+      working-directory: curses
+      run: |
+        pyinstaller --onefile --name multi-timer \
+          --hidden-import multi_timer \
+          --hidden-import multi_timer.app \
+          --hidden-import multi_timer.models \
+          --hidden-import multi_timer.persistence \
+          --hidden-import multi_timer.config \
+          --hidden-import multi_timer.database \
+          --hidden-import multi_timer.settings_dialog \
+          multi_timer/main.py 2>/dev/null || \
+        pyinstaller --onefile --name multi-timer \
+          --collect-all multi_timer \
+          multi_timer/main.py
+
+    - name: Verify binary exists and is executable
+      working-directory: curses
+      run: |
+        if [ ! -f dist/multi-timer ]; then
+          echo "ERROR: multi-timer binary not found in dist/"
+          exit 1
+        fi
+        chmod +x dist/multi-timer
+        file dist/multi-timer
+        ls -la dist/multi-timer
