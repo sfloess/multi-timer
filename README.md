@@ -1,5 +1,7 @@
 # ⏱️ Multi-Timer Pro
 
+![Multi-Timer Banner](multi-timer.jpg)
+
 [![React Native](https://img.shields.io/badge/React%20Native-Cross%2C%20Web%2C%20Android%2C%20iOS-blue?logo=react)](#1-react-native--expo-root-application)
 [![Java Swing](https://img.shields.io/badge/Java-Swing%20Desktop-orange?logo=java)](#2-java-swing-java-desktop)
 [![Python Curses](https://img.shields.io/badge/Python-Curses%20Terminal-yellow?logo=python)](#3-python-curses-terminal-app)
