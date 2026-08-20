@@ -1,0 +1,14 @@
+{
+  "files": [
+    "src/types/timer.ts",
+    "src/context/TimerContext.tsx",
+    "src/components/TimerDisplay.tsx",
+    "src/components/TimerPane.tsx",
+    "src/components/TimePickerModal.tsx",
+    "src/components/NotesModal.tsx",
+    "src/components/Toolbar.tsx",
+    "App.tsx"
+  ],
+  "design_model": "fallback/gemini-3.5-flash",
+  "output_dir": "../multi-timer-dev"
+}
