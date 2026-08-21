@@ -1,11 +1,15 @@
 # Multi-Timer Pro
 
+<p align="center">
+  <img src="multi-timer.jpg" alt="Multi-Timer Pro" width="600">
+</p>
+
 [![Java Swing](https://img.shields.io/badge/Java-Swing%20Desktop-orange?logo=openjdk)](#java-swing)
 [![Android](https://img.shields.io/badge/Android-Kotlin%20Compose-3DDC84?logo=android)](#android)
 [![Python Curses](https://img.shields.io/badge/Python-Curses%20Terminal-yellow?logo=python)](#python-curses)
 [![SwiftUI](https://img.shields.io/badge/Swift-SwiftUI%20iOS-purple?logo=apple)](#ios-swiftui)
 [![WPF .NET 8](https://img.shields.io/badge/C%23-WPF%20Windows-informational?logo=dotnet)](#windows-wpf)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A cross-platform multi-timer application for productivity, cooking, interval training, and task management. Run multiple independent countdown timers simultaneously with notes, reordering, and audio-visual alerts.
 
@@ -24,6 +28,14 @@ Built natively on each platform for the best user experience.
 - **Auto-Save**: Timer states persist automatically across restarts
 - **Dark Theme**: Consistent dark styling across all platforms
 - **Database Support**: SQLite and PostgreSQL with configuration UI
+
+---
+
+## Screenshots
+
+| Java Swing (Desktop) | Python Curses (Terminal) |
+| :---: | :---: |
+| ![Swing](screenshots/swing.png) | ![Curses](screenshots/curses.png) |
 
 ---
 

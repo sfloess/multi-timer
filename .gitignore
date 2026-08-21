@@ -65,3 +65,7 @@ DerivedData/
 # Consensus pipeline artifacts
 *-consensus.json
 build-report.json
+review-all.json
+meta-review-all.json
+meta-meta-review-all.json
+doc-review-results.json

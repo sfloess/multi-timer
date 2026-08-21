@@ -2,12 +2,11 @@
 """Entry point for multi-timer curses app."""
 
 import curses
-from multi_timer.app import MultiTimerApp
+from multi_timer.app import main as app_main
 
 
 def run():
-    app = MultiTimerApp()
-    curses.wrapper(app.run)
+    curses.wrapper(app_main)
 
 
 if __name__ == "__main__":
