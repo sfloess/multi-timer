@@ -84,10 +84,13 @@ class Storage:
 
     @staticmethod
     def save(timers: List[TimerState]):
-        os.makedirs(Storage.PATH, exist_ok=True)
-        data = [t.to_dict() for t in timers]
-        with open(Storage.FILE, 'w') as f:
-            json.dump(data, f)
+        try:
+            os.makedirs(Storage.PATH, exist_ok=True)
+            data = [t.to_dict() for t in timers]
+            with open(Storage.FILE, 'w') as f:
+                json.dump(data, f)
+        except OSError:
+            pass
 
     @staticmethod
     def load() -> List[TimerState]:
@@ -190,12 +193,10 @@ class TUI:
                 continue
 
             if ch == -1:
-                # Check for completed timers to trigger beep safely in the main thread
-                with self.engine.lock:
-                    for t in self.engine.timers:
-                        if t.remaining == 0 and not t.is_running:
-                            # Avoid beeping repeatedly if already handled or just completed
-                            pass
+                continue
+
+            if ch == curses.KEY_RESIZE:
+                self.stdscr.clear()
                 continue
 
             if ch == ord('q'):

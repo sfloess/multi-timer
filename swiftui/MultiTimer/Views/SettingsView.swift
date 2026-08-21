@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @ObservedObject var configManager: ConfigManager
+    var configManager: ConfigManager
     @State private var storageMode: StorageMode
     @State private var sqlitePath: String
     @State private var pgHost: String
@@ -93,7 +93,7 @@ struct SettingsView: View {
         configManager.config.postgres.database = pgDatabase
         configManager.config.postgres.username = pgUsername
         configManager.config.postgres.password = pgPassword
-        configManager.saveConfig()
+        configManager.save()
 
         let _ = DatabaseService.shared.setStorageMode(storageMode)
     }

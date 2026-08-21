@@ -1,5 +1,4 @@
 import Foundation
-import Combine
 
 /// Represents the available storage engines for the application.
 enum StorageMode: String, Codable, CaseIterable {
@@ -26,9 +25,11 @@ struct AppConfig: Codable {
 }
 
 /// Manages application configuration, persisting to a JSON file in the user's home directory.
-/// This class is an ObservableObject to allow SwiftUI views to react to configuration changes.
-class ConfigManager: ObservableObject {
-    @Published var config: AppConfig {
+@Observable
+final class ConfigManager {
+    static let shared = ConfigManager()
+
+    var config: AppConfig {
         didSet {
             save()
         }
