@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*.*'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.2)'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -16,12 +21,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Extract version from tag
+    - name: Extract version
       id: get_version
       run: |
-        VERSION=${GITHUB_REF#refs/tags/v}
+        if [ -n "${{ github.event.inputs.tag }}" ]; then
+          TAG="${{ github.event.inputs.tag }}"
+        else
+          TAG="${GITHUB_REF#refs/tags/}"
+        fi
+        VERSION="${TAG#v}"
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-        echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        echo "TAG=$TAG" >> $GITHUB_OUTPUT
         echo "Releasing version: $VERSION"
 
     - name: Set up JDK 17
@@ -204,7 +214,7 @@ jobs:
 
   create-release:
     needs: [build-jar, build-windows-exe, build-curses, build-android, build-ios]
-    if: always() && startsWith(github.ref, 'refs/tags/') && needs.build-jar.result == 'success'
+    if: always() && needs.build-jar.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
