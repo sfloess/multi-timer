@@ -6,9 +6,9 @@ data class TimerModel(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
     val totalSeconds: Long,
-    var remainingSeconds: Long = totalSeconds,
-    var status: TimerStatus = TimerStatus.IDLE,
-    var notes: String = ""
+    val remainingSeconds: Long = totalSeconds,
+    val status: TimerStatus = TimerStatus.IDLE,
+    val notes: String = ""
 )
 
 enum class TimerStatus {

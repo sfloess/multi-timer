@@ -200,36 +200,51 @@ class TUI:
 
             if ch == ord('q'):
                 self.engine.stop()
-                Storage.save(self.engine.timers)
+                with self.engine.lock:
+                    Storage.save(self.engine.timers)
                 break
             elif ch == curses.KEY_UP:
                 self.selected_idx = max(0, self.selected_idx - 1)
             elif ch == curses.KEY_DOWN:
-                if self.engine.timers:
-                    self.selected_idx = min(len(self.engine.timers) - 1, self.selected_idx + 1)
+                with self.engine.lock:
+                    if self.engine.timers:
+                        self.selected_idx = min(len(self.engine.timers) - 1, self.selected_idx + 1)
             elif ch == ord('a'):
                 name = self.prompt_input("Name")
                 self.engine.add_timer(name)
             elif ch == ord('d'):
-                if self.engine.timers:
-                    tid = self.engine.timers[self.selected_idx].id
-                    self.engine.delete_timer(tid)
+                with self.engine.lock:
                     if self.engine.timers:
-                        self.selected_idx = min(self.selected_idx, len(self.engine.timers) - 1)
+                        tid = self.engine.timers[self.selected_idx].id
                     else:
-                        self.selected_idx = 0
+                        tid = None
+                if tid:
+                    self.engine.delete_timer(tid)
+                    with self.engine.lock:
+                        if self.engine.timers:
+                            self.selected_idx = min(self.selected_idx, len(self.engine.timers) - 1)
+                        else:
+                            self.selected_idx = 0
             elif ch == ord('n'):
-                if self.engine.timers:
-                    tid = self.engine.timers[self.selected_idx].id
-                    notes = self.prompt_input("Notes", self.engine.timers[self.selected_idx].notes)
+                with self.engine.lock:
+                    if self.engine.timers:
+                        tid = self.engine.timers[self.selected_idx].id
+                        current_notes = self.engine.timers[self.selected_idx].notes
+                    else:
+                        tid = None
+                        current_notes = ""
+                if tid:
+                    notes = self.prompt_input("Notes", current_notes)
                     self.engine.update_notes(tid, notes)
             elif ch == ord('r'):
-                if self.engine.timers:
-                    tid = self.engine.timers[self.selected_idx].id
+                with self.engine.lock:
+                    tid = self.engine.timers[self.selected_idx].id if self.engine.timers else None
+                if tid:
                     self.engine.reset_timer(tid)
             elif ch == 10: # Enter
-                if self.engine.timers:
-                    tid = self.engine.timers[self.selected_idx].id
+                with self.engine.lock:
+                    tid = self.engine.timers[self.selected_idx].id if self.engine.timers else None
+                if tid:
                     self.engine.toggle_timer(tid)
 
 def main(stdscr):
