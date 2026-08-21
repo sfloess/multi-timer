@@ -23,8 +23,9 @@ public partial class App : Application
             var savedTimers = _timerRepository.LoadTimers();
             _mainViewModel = new MainViewModel(savedTimers);
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Failed to load timers: {ex.Message}");
             _mainViewModel = new MainViewModel(new List<TimerItem>());
         }
 
@@ -45,8 +46,9 @@ public partial class App : Application
                 _timerRepository.SaveTimers(items);
             }
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Failed to save timers on exit: {ex.Message}");
         }
 
         base.OnExit(e);

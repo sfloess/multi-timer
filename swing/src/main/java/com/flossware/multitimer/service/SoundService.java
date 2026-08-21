@@ -79,6 +79,10 @@ public class SoundService {
         AudioInputStream inputStream = AudioSystem.getAudioInputStream(url);
         Clip clip = AudioSystem.getClip();
         clip.open(inputStream);
+        if (alarmClip != null) {
+            alarmClip.stop();
+            alarmClip.close();
+        }
         this.alarmClip = clip;
     }
 

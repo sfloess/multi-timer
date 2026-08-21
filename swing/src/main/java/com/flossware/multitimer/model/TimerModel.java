@@ -134,9 +134,11 @@ public class TimerModel {
 
     public void decrement() {
         if (status == Status.RUNNING) {
+            long oldRemaining = remainingSeconds;
             remainingSeconds--;
-            getPcs().firePropertyChange("remainingSeconds", remainingSeconds, remainingSeconds - 1);
-            if (remainingSeconds == 0) {
+            getPcs().firePropertyChange("remainingSeconds", oldRemaining, remainingSeconds);
+            if (remainingSeconds <= 0) {
+                remainingSeconds = 0;
                 status = Status.FINISHED;
                 getPcs().firePropertyChange("status", Status.RUNNING, Status.FINISHED);
             }

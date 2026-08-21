@@ -1,6 +1,9 @@
 using System;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MultiTimer.Services;
 
@@ -16,7 +19,44 @@ public class AppConfig
     public int PgPort { get; set; } = 5432;
     public string PgDatabase { get; set; } = "multitimer";
     public string PgUser { get; set; } = "postgres";
-    public string PgPassword { get; set; } = string.Empty;
+    public string PgPasswordProtected { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public string PgPassword
+    {
+        get => UnprotectPassword(PgPasswordProtected);
+        set => PgPasswordProtected = ProtectPassword(value);
+    }
+
+    private static string ProtectPassword(string plaintext)
+    {
+        if (string.IsNullOrEmpty(plaintext)) return string.Empty;
+        try
+        {
+            byte[] data = Encoding.UTF8.GetBytes(plaintext);
+            byte[] encrypted = ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser);
+            return Convert.ToBase64String(encrypted);
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    private static string UnprotectPassword(string protectedBase64)
+    {
+        if (string.IsNullOrEmpty(protectedBase64)) return string.Empty;
+        try
+        {
+            byte[] encrypted = Convert.FromBase64String(protectedBase64);
+            byte[] data = ProtectedData.Unprotect(encrypted, null, DataProtectionScope.CurrentUser);
+            return Encoding.UTF8.GetString(data);
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
 }
 
 public class ConfigService

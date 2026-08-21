@@ -5,6 +5,7 @@ import com.flossware.multitimer.model.TimerModel;
 import java.beans.PropertyChangeSupport;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.SwingUtilities;
 
 public class TimerService {
     private final AppState state;
@@ -23,14 +24,16 @@ public class TimerService {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                for (TimerModel model : state.getTimers()) {
-                    if (model.isRunning()) {
-                        model.decrement();
-                        if (model.isFinished()) {
-                            soundService.playAlarm();
+                SwingUtilities.invokeLater(() -> {
+                    for (TimerModel model : state.getTimers()) {
+                        if (model.isRunning()) {
+                            model.decrement();
+                            if (model.isFinished()) {
+                                soundService.playAlarm();
+                            }
                         }
                     }
-                }
+                });
             }
         }, 1000, 1000);
     }
