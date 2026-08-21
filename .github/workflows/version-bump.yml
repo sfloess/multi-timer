@@ -1,0 +1,78 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+
+permissions:
+  contents: write
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Get current version
+      id: current_version
+      run: |
+        CURRENT_VERSION=$(cat VERSION | tr -d '[:space:]')
+        echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        echo "Current version: $CURRENT_VERSION"
+
+    - name: Calculate new version
+      id: new_version
+      run: |
+        CURRENT="${{ steps.current_version.outputs.CURRENT_VERSION }}"
+        MAJOR=$(echo $CURRENT | cut -d. -f1)
+        MINOR=$(echo $CURRENT | cut -d. -f2)
+
+        if [ "${{ github.event.inputs.version_type }}" = "major" ]; then
+          NEW_MAJOR=$((MAJOR + 1))
+          NEW_MINOR=0
+        else
+          NEW_MAJOR=$MAJOR
+          NEW_MINOR=$((MINOR + 1))
+        fi
+
+        NEW_VERSION="${NEW_MAJOR}.${NEW_MINOR}"
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "New version: $NEW_VERSION"
+
+    - name: Update VERSION file
+      run: echo "${{ steps.new_version.outputs.NEW_VERSION }}" > VERSION
+
+    - name: Commit version bump
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add VERSION
+        git commit -m "chore: bump version to ${{ steps.new_version.outputs.NEW_VERSION }}"
+        git push
+
+    - name: Create and push tag
+      run: |
+        git tag -a "v${{ steps.new_version.outputs.NEW_VERSION }}" -m "Release v${{ steps.new_version.outputs.NEW_VERSION }}"
+        git push origin "v${{ steps.new_version.outputs.NEW_VERSION }}"
+
+    - name: Summary
+      run: |
+        echo "### Version Bump Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Old Version:** ${{ steps.current_version.outputs.CURRENT_VERSION }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **New Version:** ${{ steps.new_version.outputs.NEW_VERSION }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Bump Type:** ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The release workflow will be triggered automatically." >> $GITHUB_STEP_SUMMARY

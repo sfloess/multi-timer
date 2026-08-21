@@ -301,6 +301,12 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Checkout for tagging
+      if: success()
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: Update latest tag
       if: success()
       run: |
