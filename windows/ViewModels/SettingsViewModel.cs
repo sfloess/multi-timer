@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -10,16 +9,12 @@ namespace MultiTimer.ViewModels;
 public class SettingsViewModel : INotifyPropertyChanged
 {
     private readonly ConfigService _configService;
-    private readonly DatabaseService _databaseService;
 
-    public SettingsViewModel(ConfigService configService, DatabaseService databaseService)
+    public SettingsViewModel()
     {
-        _configService = configService;
-        _databaseService = databaseService;
+        _configService = ConfigService.Instance;
         LoadConfig();
-
         SaveCommand = new RelayCommand(Save);
-        TestConnectionCommand = new RelayCommand(TestConnection);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -29,7 +24,7 @@ public class SettingsViewModel : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    private AppConfig _config;
+    private AppConfig _config = new();
     public AppConfig Config
     {
         get => _config;
@@ -44,30 +39,14 @@ public class SettingsViewModel : INotifyPropertyChanged
     }
 
     public ICommand SaveCommand { get; }
-    public ICommand TestConnectionCommand { get; }
 
     private void LoadConfig()
     {
-        Config = _configService.Load();
+        Config = _configService.GetConfig();
     }
 
     private void Save()
     {
-        _configService.Save(Config);
-    }
-
-    private void TestConnection()
-    {
-        if (Config.StorageMode == StorageMode.PostgreSql)
-        {
-            var success = _databaseService.TestPostgreSqlConnection(
-                Config.PostgresHost,
-                Config.PostgresPort,
-                Config.PostgresDatabase,
-                Config.PostgresUser,
-                Config.PostgresPassword
-            );
-            // TODO: Show success/failure message in UI
-        }
+        _configService.SaveConfig(Config);
     }
 }

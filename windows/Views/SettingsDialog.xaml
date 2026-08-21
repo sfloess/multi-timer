@@ -1,7 +1,6 @@
 <Window x:Class="MultiTimer.Views.SettingsDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:svc="clr-namespace:MultiTimer.Services"
         Title="Settings" Height="450" Width="500"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <Grid Margin="10">
@@ -23,46 +22,36 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Storage Mode -->
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Storage Mode:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-        <ComboBox Grid.Row="0" Grid.Column="1" Margin="0,0,5,5" SelectedItem="{Binding Config.StorageMode, Mode=TwoWay}">
-            <ComboBoxItem Content="{x:Static svc:StorageMode.Json}"/>
-            <ComboBoxItem Content="{x:Static svc:StorageMode.Sqlite}"/>
-            <ComboBoxItem Content="{x:Static svc:StorageMode.PostgreSql}"/>
+        <ComboBox Grid.Row="0" Grid.Column="1" x:Name="StorageModeCombo" Margin="0,0,5,5"
+                  SelectedIndex="0">
+            <ComboBoxItem Content="JSON"/>
+            <ComboBoxItem Content="SQLite"/>
+            <ComboBoxItem Content="PostgreSQL"/>
         </ComboBox>
 
-        <!-- SQLite Path -->
         <TextBlock Grid.Row="1" Grid.Column="0" Text="SQLite Path:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Config.SqlitePath, Mode=TwoWay}" Margin="0,0,5,5"/>
-        <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Command="{Binding BrowseSqlitePathCommand}" Margin="0,0,0,5"/>
+        <TextBox Grid.Row="1" Grid.Column="1" x:Name="SqlitePathBox" Margin="0,0,5,5"/>
+        <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Click="BrowseButton_Click" Margin="0,0,0,5"/>
 
-        <!-- PostgreSQL Host -->
         <TextBlock Grid.Row="2" Grid.Column="0" Text="PG Host:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Config.PostgresHost, Mode=TwoWay}" Margin="0,0,5,5"/>
+        <TextBox Grid.Row="2" Grid.Column="1" x:Name="PgHostBox" Margin="0,0,5,5"/>
 
-        <!-- PostgreSQL Port -->
         <TextBlock Grid.Row="3" Grid.Column="0" Text="PG Port:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Config.PostgresPort, Mode=TwoWay}" Margin="0,0,5,5"/>
+        <TextBox Grid.Row="3" Grid.Column="1" x:Name="PgPortBox" Margin="0,0,5,5"/>
 
-        <!-- PostgreSQL Database -->
         <TextBlock Grid.Row="4" Grid.Column="0" Text="PG Database:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Config.PostgresDatabase, Mode=TwoWay}" Margin="0,0,5,5"/>
+        <TextBox Grid.Row="4" Grid.Column="1" x:Name="PgDatabaseBox" Margin="0,0,5,5"/>
 
-        <!-- PostgreSQL User -->
         <TextBlock Grid.Row="5" Grid.Column="0" Text="PG User:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Config.PostgresUser, Mode=TwoWay}" Margin="0,0,5,5"/>
+        <TextBox Grid.Row="5" Grid.Column="1" x:Name="PgUserBox" Margin="0,0,5,5"/>
 
-        <!-- PostgreSQL Password -->
         <TextBlock Grid.Row="6" Grid.Column="0" Text="PG Password:" VerticalAlignment="Center" Margin="0,0,5,5"/>
-        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Config.PostgresPassword, Mode=TwoWay}" Margin="0,0,5,5"/>
+        <PasswordBox Grid.Row="6" Grid.Column="1" x:Name="PgPasswordBox" Margin="0,0,5,5"/>
 
-        <!-- Test Connection -->
-        <Button Grid.Row="7" Grid.Column="1" Content="Test Connection" Command="{Binding TestConnectionCommand}" HorizontalAlignment="Left" Margin="0,10,0,10"/>
-
-        <!-- Save / Cancel -->
         <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Save" Command="{Binding SaveCommand}" Width="75" Margin="0,0,5,0"/>
-            <Button Content="Cancel" Command="{Binding CancelCommand}" Width="75"/>
+            <Button Content="Save" Click="SaveButton_Click" Width="75" Margin="0,0,5,0"/>
+            <Button Content="Cancel" Click="CancelButton_Click" Width="75" IsCancel="True"/>
         </StackPanel>
     </Grid>
 </Window>

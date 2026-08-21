@@ -1,33 +1,56 @@
-using System;
 using System.Windows;
 using MultiTimer.Services;
-using MultiTimer.ViewModels;
 
 namespace MultiTimer.Views;
 
 public partial class SettingsDialog : Window
 {
-    private readonly SettingsViewModel _viewModel;
     private readonly ConfigService _configService;
-    private readonly DatabaseService _databaseService;
 
-    public SettingsDialog(ConfigService configService, DatabaseService databaseService)
+    public SettingsDialog()
     {
         InitializeComponent();
-        _configService = configService;
-        _databaseService = databaseService;
-        _viewModel = new SettingsViewModel(configService, databaseService);
-        DataContext = _viewModel;
-        Owner = Application.Current.MainWindow;
+        _configService = ConfigService.Instance;
+        LoadConfig();
+    }
+
+    private void LoadConfig()
+    {
+        var config = _configService.GetConfig();
+        SqlitePathBox.Text = config.SqlitePath;
+        PgHostBox.Text = config.PgHost;
+        PgPortBox.Text = config.PgPort.ToString();
+        PgDatabaseBox.Text = config.PgDatabase;
+        PgUserBox.Text = config.PgUser;
+        PgPasswordBox.Password = config.PgPassword;
+
+        StorageModeCombo.SelectedIndex = config.StorageMode switch
+        {
+            "sqlite" => 1,
+            "postgresql" => 2,
+            _ => 0
+        };
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_viewModel.Save())
+        var config = _configService.GetConfig();
+        config.StorageMode = StorageModeCombo.SelectedIndex switch
         {
-            DialogResult = true;
-            Close();
-        }
+            1 => "sqlite",
+            2 => "postgresql",
+            _ => "json"
+        };
+        config.SqlitePath = SqlitePathBox.Text;
+        config.PgHost = PgHostBox.Text;
+        if (int.TryParse(PgPortBox.Text, out int port))
+            config.PgPort = port;
+        config.PgDatabase = PgDatabaseBox.Text;
+        config.PgUser = PgUserBox.Text;
+        config.PgPassword = PgPasswordBox.Password;
+        _configService.SaveConfig(config);
+        DialogResult = true;
+        Close();
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -48,12 +71,7 @@ public partial class SettingsDialog : Window
 
         if (dialog.ShowDialog() == true)
         {
-            _viewModel.SqlitePath = dialog.FileName;
+            SqlitePathBox.Text = dialog.FileName;
         }
-    }
-
-    private void TestConnectionButton_Click(object sender, RoutedEventArgs e)
-    {
-        _viewModel.TestConnection();
     }
 }

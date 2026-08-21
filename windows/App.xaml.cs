@@ -1,6 +1,5 @@
-
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using MultiTimer.Models;
@@ -11,8 +10,8 @@ namespace MultiTimer;
 
 public partial class App : Application
 {
-    private ITimerRepository _timerRepository;
-    private MainViewModel _mainViewModel;
+    private ITimerRepository? _timerRepository;
+    private MainViewModel? _mainViewModel;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -23,21 +22,15 @@ public partial class App : Application
             _timerRepository = new TimerRepository();
             var savedTimers = _timerRepository.LoadTimers();
             _mainViewModel = new MainViewModel(savedTimers);
-
-            if (Current.MainWindow is MainWindow mainWindow)
-            {
-                mainWindow.DataContext = _mainViewModel;
-            }
         }
-        catch (Exception ex)
+        catch
         {
-            MessageBox.Show($"Failed to load timer data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             _mainViewModel = new MainViewModel(new List<TimerItem>());
-            if (Current.MainWindow is MainWindow mainWindow)
-            {
-                mainWindow.DataContext = _mainViewModel;
-            }
         }
+
+        var mainWindow = new MainWindow();
+        mainWindow.DataContext = _mainViewModel;
+        mainWindow.Show();
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -46,15 +39,14 @@ public partial class App : Application
         {
             if (_mainViewModel != null && _timerRepository != null)
             {
-                var timerItems = _mainViewModel.Timers
-                    .Select(timer => timer.TimerItem)
+                var items = _mainViewModel.Timers
+                    .Select(t => t.TimerItem)
                     .ToList();
-                _timerRepository.SaveTimers(timerItems);
+                _timerRepository.SaveTimers(items);
             }
         }
-        catch (Exception ex)
+        catch
         {
-            MessageBox.Show($"Failed to save timer data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         base.OnExit(e);
