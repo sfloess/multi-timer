@@ -1,40 +1,67 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Build outputs
+*.class
+*.jar
+!swing/target/multi-timer.jar
+*.war
+*.ear
+target/
+build/
+out/
+dist/
+publish/
 
-# dependencies
+# IDE
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+*.sln.docstates
+.vs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java/Maven
+dependency-reduced-pom.xml
+
+# .NET
+bin/
+obj/
+*.nupkg
+
+# Gradle
+.gradle/
+local.properties
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Node (legacy, not used)
 node_modules/
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
-
-# Native
+# Kotlin
 .kotlin/
-*.orig.*
+
+# Xcode
+*.xcuserdata
+*.xcworkspace
+DerivedData/
+
+# Secrets
+.env*.local
+*.pem
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
 
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
-
-# generated native folders
-/ios
+# Consensus pipeline artifacts
+*-consensus.json
+build-report.json
