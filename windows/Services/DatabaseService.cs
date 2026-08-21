@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Data.Sqlite;
 using Npgsql;
 using MultiTimer.Models;
@@ -151,7 +152,7 @@ public class DatabaseService
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText = "DELETE FROM timers WHERE id = @id;";
-            command.Parameters.AddWithValue("@id", id.ToString());
+            AddParam(command, "@id", id.ToString());
             command.ExecuteNonQuery();
         }
         else if (_storageMode == StorageMode.PostgreSQL)
@@ -160,7 +161,7 @@ public class DatabaseService
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText = "DELETE FROM timers WHERE id = @id;";
-            command.Parameters.AddWithValue("@id", id.ToString());
+            AddParam(command, "@id", id.ToString());
             command.ExecuteNonQuery();
         }
     }
@@ -271,14 +272,22 @@ public class DatabaseService
         return timer;
     }
 
+    private void AddParam(System.Data.Common.DbCommand command, string name, object value)
+    {
+        var p = command.CreateParameter();
+        p.ParameterName = name;
+        p.Value = value;
+        command.Parameters.Add(p);
+    }
+
     private void AddParameters(System.Data.Common.DbCommand command, TimerModel timer, int position)
     {
-        command.Parameters.AddWithValue("@id", timer.Id.ToString());
-        command.Parameters.AddWithValue("@name", timer.Name ?? string.Empty);
-        command.Parameters.AddWithValue("@total_seconds", (int)timer.Duration.TotalSeconds);
-        command.Parameters.AddWithValue("@remaining_seconds", (int)timer.Remaining.TotalSeconds);
-        command.Parameters.AddWithValue("@status", timer.IsRunning ? "Running" : "Stopped");
-        command.Parameters.AddWithValue("@notes", timer.Notes ?? string.Empty);
-        command.Parameters.AddWithValue("@position", position);
+        AddParam(command, "@id", timer.Id.ToString());
+        AddParam(command, "@name", timer.Name ?? string.Empty);
+        AddParam(command, "@total_seconds", (int)timer.Duration.TotalSeconds);
+        AddParam(command, "@remaining_seconds", (int)timer.Remaining.TotalSeconds);
+        AddParam(command, "@status", timer.IsRunning ? "Running" : "Stopped");
+        AddParam(command, "@notes", timer.Notes ?? string.Empty);
+        AddParam(command, "@position", position);
     }
 }

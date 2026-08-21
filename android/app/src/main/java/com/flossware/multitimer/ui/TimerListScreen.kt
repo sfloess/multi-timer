@@ -28,14 +28,14 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimerListScreen(viewModel: TimerViewModel) {
-    val timers by viewModel.timers.collectAsState()
+fun TimerListScreen(viewModel: TimerViewModel, modifier: Modifier = Modifier) {
+    val state by viewModel.timers.collectAsState()
     val selectedTimerId by viewModel.selectedTimerId.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color(0xFF0F172A))
             .padding(16.dp)
@@ -85,7 +85,7 @@ fun TimerListScreen(viewModel: TimerViewModel) {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(timers, key = { it.id }) { timer ->
+            items(state.timers, key = { it.id }) { timer ->
                 TimerCard(
                     timer = timer,
                     isSelected = timer.id == selectedTimerId,
@@ -337,9 +337,10 @@ private fun AddTimerDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            val totalSeconds = hours.toLongOrNull()?.times(3600) ?: 0 +
-                                minutes.toLongOrNull()?.times(60) ?: 0 +
-                                seconds.toLongOrNull() ?: 0
+                            val h = hours.toLongOrNull() ?: 0L
+                            val m = minutes.toLongOrNull() ?: 0L
+                            val s = seconds.toLongOrNull() ?: 0L
+                            val totalSeconds = h * 3600 + m * 60 + s
                             if (totalSeconds > 0) {
                                 onConfirm(name.ifBlank { "Timer" }, totalSeconds)
                             }

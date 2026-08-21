@@ -1,5 +1,6 @@
 package com.flossware.multitimer
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,9 +19,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.flossware.multitimer.ui.screens.TimerListScreen
+import com.flossware.multitimer.ui.TimerListScreen
 import com.flossware.multitimer.ui.theme.MultiTimerTheme
 import com.flossware.multitimer.viewmodel.TimerViewModel
 
@@ -29,13 +29,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val prefs = getSharedPreferences("multi_timer", Context.MODE_PRIVATE)
+
         setContent {
             MultiTimerTheme(darkTheme = true) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen()
+                    MainScreen(
+                        timerViewModel = viewModel(factory = TimerViewModel.Factory(prefs))
+                    )
                 }
             }
         }
@@ -44,13 +48,11 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(timerViewModel: TimerViewModel = viewModel()) {
+fun MainScreen(timerViewModel: TimerViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = "Multi Timer")
-                },
+                title = { Text(text = "Multi Timer") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer

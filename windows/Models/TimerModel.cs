@@ -15,8 +15,8 @@ public partial class TimerModel : ObservableObject
 
     [ObservableProperty] private string _notes = string.Empty;
 
-    public TimeSpan Remaining => IsRunning
-        ? Duration - (DateTime.Now - StartTime)
+    public TimeSpan Remaining => IsRunning && StartTime.HasValue
+        ? Duration - (DateTime.Now - StartTime.Value)
         : Duration;
 
     public DateTime? StartTime { get; private set; }

@@ -47,6 +47,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.6.8")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
